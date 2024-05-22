@@ -1,0 +1,30 @@
+{
+    "keywords": [
+        "password",
+        "login",
+        "username",
+        "email",
+        "account",
+        "admin",
+        "root",
+        "user",
+        "pass",
+        "credential",
+        "credentials",
+        "auth",
+        "authentication",
+        "secret",
+        "host",
+        "database",
+        "token",
+        "access_token"
+    ],
+    "files_extentions": [
+        "env",
+        "conf",
+        "config",
+        "properties",
+        "yml",
+        "yaml"
+    ]
+}

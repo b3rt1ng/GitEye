@@ -32,6 +32,9 @@ $ git clone https://github.com/b3rt1ng/GitEye
 # Go into the repository
 $ cd GitEye
 
+# Install dependencies
+$ pip install -r requirements.txt
+
 # Run the app by giving a path to the git
 $ python3 main.py -p /path/to/git
 

@@ -30,7 +30,7 @@ You can use a downloaded git and git it's path but you can also use the git's li
 $ git clone https://github.com/b3rt1ng/GitEye
 
 # Go into the repository
-$ cd giteye
+$ cd GitEye
 
 # Run the app by giving a path to the git
 $ python3 main.py -p /path/to/git

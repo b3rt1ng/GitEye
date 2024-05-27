@@ -56,11 +56,11 @@ def main():
 
     fa = analyzer.FileAnalyzer(metadata.path)
     fa.list_files()
-
     try: 
         interesting_files = fa.file_of_interest()
         print(f"Found {color['green']}{len(interesting_files)}{color['reset']} interesting files")
-        table.show_table([interesting_files], ["File"], "Interesting files")
+        if len(interesting_files) > 0:
+            table.show_table([interesting_files], ["File"], "Interesting files")
     except:
         print("No interesting files found")
 

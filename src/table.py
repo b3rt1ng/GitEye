@@ -26,7 +26,7 @@ def show_table(data: list, column_names: list, title: str = "", redundancy: bool
         table.add_column(column_name, style=color)
 
     if redundancy:
-        for row in data:
+        for row in zip(*data):
             table.add_row(*row)
     else:
         for row in set(zip(*data)):

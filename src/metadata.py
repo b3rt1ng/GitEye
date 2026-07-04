@@ -1,52 +1,54 @@
-import git
 import datetime
 
+
 class Metadata:
-    def __init__(self, git_path, detailed=False) -> None:
-        """Initialize the metadata object"""
-        self.path = git_path
-        self.repo = git.Repo(git_path)
-        self.detailed = detailed # If false, the commits will only show the 5 first and the 5 last commits
+    def __init__(self, client, url, detailed=False) -> None:
+        self.client = client
+        self.owner, self.repo = client.parse_url(url)
+        self.detailed = detailed
+
+        self.repo_info = client.get_repo(self.owner, self.repo)
+        self.branch = self.repo_info["default_branch"]
+        self.commits = client.get_commits(self.owner, self.repo)
 
     @property
     def repo_name(self) -> str:
-        """Return the name of the repository"""
-        return self.repo.remotes.origin.url.split("/")[-1].replace(".git","")
-    
+        return self.repo_info["name"]
+
     @property
     def author(self) -> str:
-        """Return the name of the author"""
-        return self.repo.head.commit.author.name
-    
+        return self.commits[0]["commit"]["author"]["name"]
+
     @property
     def names(self) -> list:
-        """Return the names of the commit authors"""
-        return [commit.author.name for commit in self.repo.iter_commits()]
-    
+        return [commit["commit"]["author"]["name"] for commit in self.commits]
+
     @property
     def mails(self) -> list:
-        """Return the emails of the commit authors"""
-        return [commit.author.email for commit in self.repo.iter_commits()]
-    
+        return [commit["commit"]["author"]["email"] for commit in self.commits]
+
     @property
     def commit_count(self) -> int:
-        """Return the number of commits"""
-        return len(list(self.repo.iter_commits()))
-    
+        return len(self.commits)
+
     @property
     def first_commit_date(self) -> str:
-        """Return the date of the first commit"""
-        return datetime.datetime.fromtimestamp(list(self.repo.iter_commits())[-1].committed_date).strftime("%Y-%m-%d %H:%M:%S")
+        return self._format_date(self.commits[-1]["commit"]["author"]["date"])
 
     @property
     def last_commit_date(self) -> str:
-        """Return the date of the last commit"""
-        return datetime.datetime.fromtimestamp(self.repo.head.commit.committed_date).strftime("%Y-%m-%d %H:%M:%S")
-    
+        return self._format_date(self.commits[0]["commit"]["author"]["date"])
+
     @property
     def all_commits(self) -> list:
-        """return a list like this: [[date, message], ...]"""
-        commits = list(self.repo.iter_commits())
+        commits = self.commits
         if not self.detailed:
             commits = commits[:5] + commits[-5:]
-        return reversed([[datetime.datetime.fromtimestamp(commit.committed_date).strftime("%Y-%m-%d %H:%M:%S"), commit.message.replace("\n","")] for commit in commits])
+        return reversed([
+            [self._format_date(commit["commit"]["author"]["date"]), commit["commit"]["message"].replace("\n", "")]
+            for commit in commits
+        ])
+
+    @staticmethod
+    def _format_date(iso_date: str) -> str:
+        return datetime.datetime.strptime(iso_date, "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d %H:%M:%S")

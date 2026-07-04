@@ -2,7 +2,7 @@
   GitEye
 </h1>
 
-<h4 align="center">A simple OSINT tool to analyse git metadata
+<h4 align="center">A simple OSINT tool to analyse git metadata and audit your own GitHub footprint
 
 <p align="center">
   <a href="#features">Key Features</a> •
@@ -13,34 +13,65 @@
 
 # Context
 
-GitEye is a simple tool that will look into a git metadata and gather informations about the autors and commits history. It then tries to find some files of interest and uses keywords to find critical informations.  
-You can use a downloaded git and git it's path but you can also use the git's link so that GitEye will download and analyse it.
+GitEye queries the GitHub API to gather information about a repository's authors and commit history, then looks for files of interest and keywords that may leak critical information. It also works the other way around: point it at a GitHub username and it audits every public repo that account owns, surfacing every name/email that account has ever committed with — so you can check what your own GitHub profile is leaking before someone else finds it.
+
+It never clones or downloads anything — everything is done through HTTP requests, so nothing from the target ever touches your disk.
 
 ## Features
 
+**Repository analysis** (`-u/--url`)
 - retrieve commit authors and their email addresses
 - get the commit history
 - find interesting files
-- find keywords withing the interesting files
+- find keywords within the interesting files
 
-## How To Use
+**GitHub profile audit** (`--username`)
+- scan every non-fork public repo a username owns
+- list every name/email that username has committed with, ranked by frequency and repo
+- flag exposed (non-anonymized) email addresses
+- generate the `git filter-repo` commands to scrub them, with `--help-me-fix`
+
+## Setup
 
 ```bash
 # Clone this repository
 $ git clone https://github.com/b3rt1ng/GitEye
 
 # Go into the repository
-$ cd giteye
+$ cd GitEye
 
-# Run the app by giving a path to the git
-$ python3 main.py -p /path/to/git
+# Install dependencies
+$ pip install -r requirements.txt
 
-# Alternatively you can give a direct link
-$ python3 main.py -p https://github.com/user/project
+# Optional: enable the file/secret scanning stage and raise the GitHub API
+# rate limit from 60 to 5000 req/h by providing a GitHub token
+$ cp .env.example .env
+$ echo "GITHUB_TOKEN=ghp_xxx" >> .env
+```
 
+## How To Use
+
+```bash
+# Analyze a single GitHub repository
+$ python3 main.py -u https://github.com/user/project
+
+# Audit a GitHub profile: scans their non-fork public repos and lists every
+# name/email they've committed with, ranked by how often each appears
+$ python3 main.py --username someuser
+
+# Add --help-me-fix to also flag exposed (non-anonymized) emails and print
+# ready-to-run git filter-repo + force-push commands per affected repo
+$ python3 main.py --username someuser --help-me-fix
+
+# Pass 'ssh' if you push over SSH rather than HTTPS, to get git@github.com:... remotes
+$ python3 main.py --username someuser --help-me-fix ssh
 ```
 > **Note**
-> Some of the info can be long and are getting shortened by default, pass the `-d` or `--detailed` argument to the command prompt to display everything.
+> Some of the info can be long and are getting shortened by default, pass the `-d` or `--detailed` argument to the command prompt to display everything. In `--username` mode, `-d` also prints every individual commit trace (repo, name, mail, date) instead of just the aggregated identities table.
+> **Note**
+> `--help-me-fix` requires [`git-filter-repo`](https://github.com/newren/git-filter-repo) (`pip install git-filter-repo`) — it's a separate tool, not a built-in git subcommand. Rewriting history changes commit SHAs: existing forks/clones/PRs keep the old exposed commits, and GH Archive may already have a permanent copy.
+> **Note**
+> Without a `GITHUB_TOKEN` set, GitEye only reports commit/author metadata (subject to GitHub's 60 req/h anonymous rate limit) and skips the file/secret scanning stage. The `--username` profile audit always works without a token since it only needs commit metadata.
 
 ## Customize
 You can remove or add more keywords and file types in the `interest.json` file :)

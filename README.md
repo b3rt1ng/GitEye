@@ -66,11 +66,13 @@ $ python3 main.py --username someuser --help-me-fix
 # Pass 'ssh' if you push over SSH rather than HTTPS, to get git@github.com:... remotes
 $ python3 main.py --username someuser --help-me-fix ssh
 ```
-> **Note**
+> **Note 1**
 > Some of the info can be long and are getting shortened by default, pass the `-d` or `--detailed` argument to the command prompt to display everything. In `--username` mode, `-d` also prints every individual commit trace (repo, name, mail, date) instead of just the aggregated identities table.
-> **Note**
+
+> **Note 2**
 > `--help-me-fix` requires [`git-filter-repo`](https://github.com/newren/git-filter-repo) (`pip install git-filter-repo`), a separate tool, not a built-in git subcommand. Rewriting history changes commit SHAs: existing forks/clones/PRs keep the old exposed commits, and GH Archive may already have a permanent copy.
-> **Note**
+
+> **Note 3**
 > Without a `GITHUB_TOKEN` set, GitEye only reports commit/author metadata (subject to GitHub's 60 req/h anonymous rate limit) and skips the file/secret scanning stage. The `--username` profile audit always works without a token since it only needs commit metadata.
 
 ## Customize
